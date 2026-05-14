@@ -101,7 +101,7 @@ changelog:
 release:
   github:
     owner: tharunn0
-    name: blitz
+    name: blitz-cache
 
   draft: false
   prerelease: auto
