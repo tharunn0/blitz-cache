@@ -1,0 +1,111 @@
+version: 2
+
+project_name: blitz
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: blitz
+
+    main: ./cmd/server
+
+    binary: blitz
+
+    env:
+      - CGO_ENABLED=0
+
+    goos:
+      - linux
+      - darwin
+      - windows
+
+    goarch:
+      - amd64
+      - arm64
+
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .Date }}
+
+archives:
+  - id: archives
+
+    builds:
+      - blitz
+
+    name_template: >-
+      {{ .ProjectName }}_
+      {{ .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}arm64{{ end }}
+
+    formats:
+      - tar.gz
+
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: checksums.txt
+
+nfpms:
+  - id: linux-packages
+
+    builds:
+      - blitz
+
+    package_name: blitz
+
+    formats:
+      - deb
+      - rpm
+
+    bindir: /usr/bin
+
+    vendor: "tharun4567"
+
+    homepage: "https://github.com/tharunn0/blitz-cache"
+
+    maintainer: "tharunn0 tharunvs777@gmail.com"
+
+    description: "A simple and fast in-memory cache system built with Go."
+
+    license: "MIT"
+    # =========================
+
+    contents:
+      - src: ./README.md
+        dst: /usr/share/doc/blitz/README.md
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+
+release:
+  github:
+    owner: tharunn0
+    name: blitz
+
+  draft: false
+  prerelease: auto
+
+  footer: |-
+    ---
+    Released by GoReleaser
